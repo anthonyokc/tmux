@@ -1,0 +1,9 @@
+#!/bin/bash
+
+sesh connect "$(
+    printf "%s\n%s" \
+        "$(sesh list -i -t)" \
+        "$(mapfile -t folders < <(fd -H -c always -d 2 -t d --ignore-file ~/.ignore . ~/code | awk -F/ 'NF > 5'); printf " %s\n" "${folders[@]}")" \
+    | gum filter --limit 1 --placeholder 'Pick a session' --height 50 --width 30 --prompt='🔎 '
+)"
+

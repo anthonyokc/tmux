@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# fzf fuzzy search of git repositories, then clone
+function fclone() {
+
+    repo="$( \
+        (cat $fzf_git_cache 2>/dev/null; $HOME/scripts/listrepo_gql $GITHUB_TOKEN $GITHUB_ORG) | \
+        tee $fzf_git_cache | \
+        nauniq | \
+        gum filter --limit 1 --placeholder 'Clone a repo' --height 50 --prompt='⬇️ '
+    )"
+
+    if [[ -n $repo ]]; then
+       echo "Cloning '$repo' from Github"
+       git clone "git@github.com:$repo.git" $HOME/code/$repo
+    fi
+}
+
+fclone
