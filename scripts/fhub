@@ -3,10 +3,10 @@
 # fzf fuzzy search of git repositories, then open in web browser
 function fhub() {
     repo="$( \
-        (cat $fzf_git_cache 2>/dev/null; $HOME/scripts/listrepo_gql $GITHUB_TOKEN $GITHUB_ORG) | \
-        tee $fzf_git_cache | \
-        nauniq | \
-        gum filter --limit 1 --placeholder 'Open a repo in web browser' --height 50 --prompt='🌐 ' \
+            (cat $fzf_git_cache 2>/dev/null; gum spin --title "Searching for GitHub Repos..." -- $HOME/scripts/listrepo_gql $GITHUB_TOKEN $GITHUB_ORG) | \
+            tee $fzf_git_cache | \
+            nauniq | \
+            gum filter --limit 1 --placeholder 'Open repo in GitHub' --height 50 --prompt='🌐 ' \
     )"
 
     if [[ -n $repo ]]; then

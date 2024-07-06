@@ -4,10 +4,10 @@
 function fclonesesh() {
 
     repo="$( \
-        (cat $fzf_git_cache 2>/dev/null; $HOME/scripts/listrepo_gql $GITHUB_SEARCH_OAUTH_TOKEN $GITHUB_ORG) | \
+        (cat $fzf_git_cache 2>/dev/null; gum spin --title "Searching for GitHub Repos..." -- $HOME/scripts/listrepo_gql $GITHUB_SEARCH_OAUTH_TOKEN $GITHUB_ORG) | \
         tee $fzf_git_cache | \
         nauniq | \
-        gum filter --limit 1 --placeholder 'Clone a repo' --height 50 --prompt='🤖 '
+        gum filter --limit 1 --placeholder 'Clone a repo...' --height 50 --prompt='🤖 '
     )"
 
     if [[ -n $repo ]]; then
@@ -15,13 +15,13 @@ function fclonesesh() {
        repo_dir="$HOME/code/$repo"
 
        if [ -d "$repo_dir" ]; then
-          echo "Directory $repo_dir already exists. Connecting..."
-          sesh connect $repo_dir
+          gum spin --title "Directory $repo_dir already exists. Connecting..." -- \
+              sesh connect $repo_dir
        else
           mkdir -p "$HOME/code/$username"  # Create directory for the username if it doesn't exist
 
-          echo "Cloning from Github into $repo_dir"
-          sesh clone -d $HOME/code/$username git@github.com:$repo.git
+          gum spin --title "Cloning from GitHub into $repo_dir" -- \
+              sesh clone -d $HOME/code/$username git@github.com:$repo.git
        fi
     fi
 }
