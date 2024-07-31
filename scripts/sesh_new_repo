@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# fzf fuzzy search of git repositories, then clone
+function sesh_new_repo() {
+
+    GITHUB_USERNAME="$(git config user.name)"
+    github_users=("$GITHUB_USERNAME" "$GITHUB_ORG")
+
+    github_user="$( \
+        printf "%s\n" "${github_users[@]}" | \
+        gum filter --limit 1 --placeholder 'Pick a GitHub username or organization...' --height 50 --prompt='🐈‍⬛'
+    )"
+
+    if [[ -n $github_user ]]; then
+       github_user_dir="$HOME/code/$github_user"
+
+       repo_dir="$(gum input --placeholder "What's the name of the new repo?" --prompt="📝 ")"
+
+       if [ -d "$github_user_dir/$repo_dir" ]; then
+          gum spin --title "Directory $github_user_dir/$repo_dir already exists. Connecting..." -- \
+              sesh connect $repo_dir
+       else
+          template=$( \
+              (gh repo list anthonyokc --json name,isTemplate --jq '.[] | select(.isTemplate) | .name') | \
+              gum filter --limit 1 --placeholder 'Pick a repo template' --height 50 --prompt='📚'
+          )
+          mkdir -p "$HOME/code/$github_user_dir"  # Create directory for the username if it doesn't exist
+
+          repo_types=("🌐 Public" "🔒 Private")
+          repo_type=$( \
+              printf "%s\n" "${repo_types[@]}" | \
+              gum filter --limit 1 --placeholder 'Pick repo type...' --height 50
+          )
+
+          if [ "$repo_type" == "🔒 Private" ]; then
+              gh repo create $github_user/$repo_dir --private --template $template
+          else
+              gh repo create $github_user/$repo_dir --public --template $template
+          fi
+
+          gum spin --title "Cloning from GitHub into $repo_dir" -- \
+              sesh clone -d $HOME/code/$github_user/$repo_dir git@github.com:$repo_dir.git
+       fi
+    fi
+}
+
+sesh_new_repo
